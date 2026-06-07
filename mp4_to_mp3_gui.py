@@ -2,6 +2,7 @@ import sys
 import os
 import subprocess
 import re
+import webbrowser
 
 # 先导入 torch/whisper，避免与 PyQt5 的 DLL 冲突
 try:
@@ -235,6 +236,15 @@ class MainWindow(QMainWindow):
         
         layout.addLayout(btn_layout)
         
+        # GitHub 链接
+        github_layout = QHBoxLayout()
+        github_layout.addStretch()
+        github_btn = QPushButton("GitHub 仓库")
+        github_btn.clicked.connect(self.open_github)
+        github_layout.addWidget(github_btn)
+        github_layout.addStretch()
+        layout.addLayout(github_layout)
+        
         # 连接信号
         self.mode_combo.currentTextChanged.connect(self.on_mode_changed)
         self.on_mode_changed()
@@ -317,6 +327,9 @@ class MainWindow(QMainWindow):
     
     def clear_log(self):
         self.log_text.clear()
+    
+    def open_github(self):
+        webbrowser.open("https://github.com/wangwanqiang/V2AS")
 
 def main():
     app = QApplication(sys.argv)
