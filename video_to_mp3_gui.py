@@ -46,28 +46,30 @@ class WorkerThread(QThread):
             self.finished.emit(False, str(e))
     
     def convert_mp4_to_mp3(self):
-        mp4_files = [f for f in os.listdir(self.input_path) if f.lower().endswith('.mp4')]
-        total = len(mp4_files)
+        # 支持的视频格式
+        video_extensions = ('.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.m4v', '.webm')
+        video_files = [f for f in os.listdir(self.input_path) if f.lower().endswith(video_extensions)]
+        total = len(video_files)
         
-        if not mp4_files:
-            self.progress.emit(0, "未找到 MP4 文件")
+        if not video_files:
+            self.progress.emit(0, "未找到视频文件")
             return
         
         os.makedirs(self.output_path, exist_ok=True)
         
-        for i, mp4_file in enumerate(mp4_files, 1):
+        for i, video_file in enumerate(video_files, 1):
             if self.stopped:
                 return
             
-            mp4_path = os.path.join(self.input_path, mp4_file)
-            mp3_filename = os.path.splitext(mp4_file)[0] + ".mp3"
+            video_path = os.path.join(self.input_path, video_file)
+            mp3_filename = os.path.splitext(video_file)[0] + ".mp3"
             mp3_path = os.path.join(self.output_path, mp3_filename)
             
-            self.progress.emit(int(i / total * 100), f"正在转换: {mp4_file}")
+            self.progress.emit(int(i / total * 100), f"正在转换: {video_file}")
             
             # 使用 ffmpeg 转换
             cmd = [
-                'ffmpeg', '-i', mp4_path,
+                'ffmpeg', '-i', video_path,
                 '-q:a', '0', '-map', 'a',
                 '-y', mp3_path
             ]
@@ -156,7 +158,7 @@ class MainWindow(QMainWindow):
         mode_layout = QHBoxLayout(mode_group)
         
         self.mode_combo = QComboBox()
-        self.mode_combo.addItems(["MP4转MP3", "语音识别添加歌词"])
+        self.mode_combo.addItems(["视频转MP3", "语音识别添加歌词"])
         mode_layout.addWidget(QLabel("选择操作:"))
         mode_layout.addWidget(self.mode_combo)
         layout.addWidget(mode_group)
@@ -251,7 +253,7 @@ class MainWindow(QMainWindow):
     
     def on_mode_changed(self):
         mode = self.mode_combo.currentText()
-        if mode == "MP4转MP3":
+        if mode == "视频转MP3":
             self.output_edit.setEnabled(True)
         else:
             self.output_edit.setEnabled(False)
@@ -282,7 +284,7 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "错误", "请选择有效的输入目录")
             return
         
-        if self.mode_combo.currentText() == "MP4转MP3" and (not output_path or not os.path.exists(output_path)):
+        if self.mode_combo.currentText() == "视频转MP3" and (not output_path or not os.path.exists(output_path)):
             QMessageBox.warning(self, "错误", "请选择有效的输出目录")
             return
         
@@ -293,7 +295,7 @@ class MainWindow(QMainWindow):
         self.status_label.setText("处理中...")
         self.log("=" * 50)
         
-        mode = "convert" if self.mode_combo.currentText() == "MP4转MP3" else "transcribe"
+        mode = "convert" if self.mode_combo.currentText() == "视频转MP3" else "transcribe"
         model_size = self.model_combo.currentText()
         
         # 创建工作线程
