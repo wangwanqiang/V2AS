@@ -2,10 +2,10 @@ import os
 import subprocess
 from pathlib import Path
 
-def extract_audio_from_mp4(input_file, output_dir):
+def extract_audio_from_video(input_file, output_dir):
     """
-    从MP4文件中提取音频并保存为MP3格式
-    :param input_file: 输入的MP4文件路径
+    从视频文件中提取音频并保存为MP3格式
+    :param input_file: 输入的视频文件路径
     :param output_dir: 输出目录
     """
     # 获取文件名（不含扩展名）
@@ -46,23 +46,26 @@ def main():
         os.makedirs(output_dir)
         print(f"📁 创建输出目录: {output_dir}")
     
-    # 查找所有MP4文件
-    mp4_files = [f for f in os.listdir(current_dir) if f.lower().endswith('.mp4')]
+    # 支持的视频格式
+    video_extensions = ('.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.m4v', '.webm')
     
-    if not mp4_files:
-        print("ℹ️ 当前目录没有找到MP4文件")
+    # 查找所有视频文件
+    video_files = [f for f in os.listdir(current_dir) if f.lower().endswith(video_extensions)]
+    
+    if not video_files:
+        print("ℹ️ 当前目录没有找到视频文件")
         return
     
-    print(f"🔍 找到 {len(mp4_files)} 个MP4文件")
+    print(f"🔍 找到 {len(video_files)} 个视频文件")
     
-    # 处理每个MP4文件
+    # 处理每个视频文件
     success_count = 0
-    for mp4_file in mp4_files:
-        input_path = os.path.join(current_dir, mp4_file)
-        if extract_audio_from_mp4(input_path, output_dir):
+    for video_file in video_files:
+        input_path = os.path.join(current_dir, video_file)
+        if extract_audio_from_video(input_path, output_dir):
             success_count += 1
     
-    print(f"\n📊 处理完成！成功: {success_count}/{len(mp4_files)}")
+    print(f"\n📊 处理完成！成功: {success_count}/{len(video_files)}")
 
 if __name__ == "__main__":
     main()
