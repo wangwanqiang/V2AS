@@ -1,0 +1,31 @@
+# 排除大型媒体文件
+*.mp4
+*.mp3
+*.lrc
+*.txt
+
+# 排除可执行文件
+*.exe
+
+# 排除 PyInstaller 构建文件
+build/
+dist/
+*.spec
+
+# 排除 Python 缓存文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 排除 Whisper 模型文件
+.cache/
+*.pt
+
+# 排除虚拟环境
+venv/
+.env/
+
+# 排除系统文件
+Thumbs.db
+.DS_Store
