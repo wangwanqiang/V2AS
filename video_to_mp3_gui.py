@@ -55,8 +55,6 @@ class WorkerThread(QThread):
             self.progress.emit(0, "未找到视频文件")
             return
         
-        os.makedirs(self.output_path, exist_ok=True)
-        
         for i, video_file in enumerate(video_files, 1):
             if self.stopped:
                 return
@@ -141,10 +139,11 @@ class WorkerThread(QThread):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("MP4转MP3工具 - 带语音识别")
+        self.setWindowTitle("视频转MP3工具 - 带语音识别")
         self.setGeometry(100, 100, 600, 500)
         
         self.worker_thread = None
+        self.default_output_dir = ""
         
         self.init_ui()
     
@@ -255,22 +254,31 @@ class MainWindow(QMainWindow):
         mode = self.mode_combo.currentText()
         if mode == "视频转MP3":
             self.output_edit.setEnabled(True)
+            # 如果有默认输出目录，使用它
+            if self.default_output_dir:
+                self.output_edit.setText(self.default_output_dir)
         else:
             self.output_edit.setEnabled(False)
-            # 语音识别模式下输出目录等于输入目录
-            self.output_edit.setText(self.input_edit.text())
+            # 语音识别模式下，使用默认输出目录（即MP3文件所在的目录）
+            if self.default_output_dir:
+                self.output_edit.setText(self.default_output_dir)
+            else:
+                self.output_edit.setText(self.input_edit.text())
     
     def browse_input(self):
         path = QFileDialog.getExistingDirectory(self, "选择输入目录")
         if path:
             self.input_edit.setText(path)
-            if self.mode_combo.currentText() == "语音识别添加歌词":
-                self.output_edit.setText(path)
+            # 设置默认输出目录为输入目录下的 mp3_output 子文件夹
+            self.default_output_dir = os.path.join(path, "mp3_output")
+            self.output_edit.setText(self.default_output_dir)
     
     def browse_output(self):
         path = QFileDialog.getExistingDirectory(self, "选择输出目录")
         if path:
             self.output_edit.setText(path)
+            # 更新默认输出目录
+            self.default_output_dir = path
     
     def log(self, message):
         self.log_text.append(message)
@@ -284,9 +292,12 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "错误", "请选择有效的输入目录")
             return
         
-        if self.mode_combo.currentText() == "视频转MP3" and (not output_path or not os.path.exists(output_path)):
-            QMessageBox.warning(self, "错误", "请选择有效的输出目录")
-            return
+        if self.mode_combo.currentText() == "视频转MP3":
+            if not output_path:
+                QMessageBox.warning(self, "错误", "请选择有效的输出目录")
+                return
+            # 确保输出目录存在
+            os.makedirs(output_path, exist_ok=True)
         
         # 设置状态
         self.start_btn.setEnabled(False)
