@@ -2,14 +2,8 @@ import sys
 import os
 import subprocess
 import re
-from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton, QLineEdit, QLabel, QProgressBar, QTextEdit,
-    QFileDialog, QComboBox, QCheckBox, QGroupBox, QMessageBox
-)
-from PyQt5.QtCore import Qt, QThread, pyqtSignal
 
-# 导入必要的库
+# 先导入 torch/whisper，避免与 PyQt5 的 DLL 冲突
 try:
     import whisper
     from mutagen.mp3 import MP3
@@ -17,6 +11,13 @@ try:
     WHISPER_AVAILABLE = True
 except ImportError:
     WHISPER_AVAILABLE = False
+
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+    QPushButton, QLineEdit, QLabel, QProgressBar, QTextEdit,
+    QFileDialog, QComboBox, QCheckBox, QGroupBox, QMessageBox
+)
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
 
 class WorkerThread(QThread):
     progress = pyqtSignal(int, str)
